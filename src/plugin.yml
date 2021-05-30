@@ -1,0 +1,21 @@
+name: LecternClaim
+main: hasjamon.lecternclaim.LecternClaim
+api-version: 1.16
+authors: [ HasJamOn, Bahm, gtg_cya ]
+version: 1.0
+description: LecternClaim plugin
+commands:
+  die:
+    description: Use this command to kill yourself if you are stuck.
+    usage: /<command>
+    aliases: [suicide, kill]
+  hints:
+    description: Turns hints on/off.
+    usage: /<command> [on|off]
+  claimcontest:
+    description: Everything you need to start a Chunk Claim Contest.
+    usage: Invalid command, see correct usage with /<command> help
+    permission: op
+  welcome:
+    description: Shows the welcome message.
+    usage: /<command>

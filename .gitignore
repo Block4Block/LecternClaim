@@ -1,0 +1,6 @@
+.idea/
+*.iml
+
+out/
+block4block-datapack-essential/
+*.zip
