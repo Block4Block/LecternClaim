@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +22,8 @@ public class ConfigManager {
     private final FileConfiguration hintSettingsCfg = YamlConfiguration.loadConfiguration(hintSettingsFile);
     private final File claimContestFile = new File(this.plugin.getDataFolder(), "claimcontest.yml");
     private final FileConfiguration claimContestCfg = YamlConfiguration.loadConfiguration(claimContestFile);
+    private final File masterBooksFile = new File(this.plugin.getDataFolder(), "masterbooks.yml");
+    private final FileConfiguration masterBooksCfg = YamlConfiguration.loadConfiguration(masterBooksFile);
 
     public ConfigManager(){
         if (!this.plugin.getDataFolder().exists())
@@ -31,6 +34,7 @@ public class ConfigManager {
         saveClaimData();
         saveHintSettings();
         saveClaimContest();
+        saveMasterBooks();
     }
 
     // Saves the default config; always overwrites. This file is purely for ease of reference; it is never loaded.
@@ -89,5 +93,18 @@ public class ConfigManager {
     public void clearClaimContest() {
         this.claimContestCfg.set("data", null);
         this.saveClaimContest();
+    }
+
+    public FileConfiguration getMasterBooks() {
+        return this.masterBooksCfg;
+    }
+
+    public void saveMasterBooks() {
+        try {
+            this.masterBooksCfg.save(this.masterBooksFile);
+            consoleSender.sendMessage(ChatColor.AQUA + "Master books have been saved to masterbooks.yml");
+        } catch (IOException e) {
+            consoleSender.sendMessage(ChatColor.RED + "Failed to save master books to masterbooks.yml");
+        }
     }
 }

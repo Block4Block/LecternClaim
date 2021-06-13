@@ -1,8 +1,11 @@
 package hasjamon.lecternclaim;
 
-import hasjamon.lecternclaim.command.*;
-import hasjamon.lecternclaim.listener.*;
+import hasjamon.lecternclaim.command.ClaimContestCommand;
+import hasjamon.lecternclaim.command.DieCommand;
+import hasjamon.lecternclaim.command.HintsCommand;
+import hasjamon.lecternclaim.command.WelcomeCommand;
 import hasjamon.lecternclaim.files.ConfigManager;
+import hasjamon.lecternclaim.listener.*;
 import hasjamon.lecternclaim.utils.utils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
@@ -28,6 +31,9 @@ public class LecternClaim extends JavaPlugin{
         registerEvents(); // Registers all the listeners
         setCommandExecutors(); // Registers all the commands
         setupHints(); // Prepares hints and starts broadcasting them
+        if(this.getConfig().getBoolean("golems-guard-claims", true))
+            getServer().getScheduler().scheduleSyncRepeatingTask(this, utils::updateGolemHostility, 0, 20);
+        utils.minSecBetweenAlerts = this.getConfig().getInt("seconds-between-intruder-alerts", 60);
     }
 
     private void setupHints() {
@@ -74,10 +80,18 @@ public class LecternClaim extends JavaPlugin{
         pluginManager.registerEvents(new BlockBreak(this), this);
         pluginManager.registerEvents(new BookPlaceTake(this), this);
         pluginManager.registerEvents(new LecternBreak(this), this);
-        pluginManager.registerEvents(new EditBook(), this);
+        pluginManager.registerEvents(new BookEdit(this), this);
         pluginManager.registerEvents(new BlockPlace(this), this);
-        pluginManager.registerEvents(new LavaCasting(), this);
+        if(this.getConfig().getBoolean("balance-lavacasting"))
+            pluginManager.registerEvents(new LavaCasting(), this);
         pluginManager.registerEvents(new PlayerJoin(this), this);
+        pluginManager.registerEvents(new PlayerMove(), this);
+        pluginManager.registerEvents(new PlayerQuit(), this);
+        pluginManager.registerEvents(new PlayerDeath(), this);
+        pluginManager.registerEvents(new PlayerRespawn(), this);
+        pluginManager.registerEvents(new ChunkLoad(), this);
+        if(this.getConfig().getBoolean("disable-freecam-interactions"))
+            pluginManager.registerEvents(new FreecamInteract(), this);
     }
 
     public static LecternClaim getInstance(){

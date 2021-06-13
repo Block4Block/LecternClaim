@@ -27,8 +27,8 @@ public class BlockPlace implements Listener {
             return;
 
         // If the block was placed in a claimed chunk
-        if (plugin.cfg.getClaimData().contains(utils.getChunkID(e.getBlockPlaced().getChunk()))) {
-            String[] members = utils.getMembers(b.getChunk());
+        if (plugin.cfg.getClaimData().contains(utils.getChunkID(e.getBlockPlaced().getLocation()))) {
+            String[] members = utils.getMembers(b.getLocation());
 
             if (!utils.isClaimBlock(b)){
                 // If the player placing the block is a member: Don't prevent block placement
@@ -48,13 +48,14 @@ public class BlockPlace implements Listener {
         Block b = e.getBlock();
         Player p = e.getPlayer();
         Material bucket = e.getBucket();
+        String chunkID = utils.getChunkID(b.getLocation());
 
-        if(plugin.cfg.getClaimData().contains(utils.getChunkID(b.getChunk()))){
-            String[] members = utils.getMembers(b.getChunk());
+        if(plugin.cfg.getClaimData().contains(chunkID)){
+            String[] members = utils.getMembers(b.getLocation());
             if (members != null) {
-                for (String member : members)
-                    if (member.equalsIgnoreCase(p.getName()))
-                        if (bucket.toString().contains("LAVA") || bucket.toString().contains("WATER"))
+                if (bucket == Material.LAVA_BUCKET || bucket == Material.WATER_BUCKET)
+                    for (String member : members)
+                        if (member.equalsIgnoreCase(p.getName()))
                             return;
 
                 p.sendMessage(utils.chat("&cYou cannot place Lava/Water inside this claim"));
