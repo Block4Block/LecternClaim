@@ -92,6 +92,8 @@ public class LecternClaim extends JavaPlugin{
         pluginManager.registerEvents(new ChunkLoad(), this);
         if(this.getConfig().getBoolean("disable-freecam-interactions"))
             pluginManager.registerEvents(new FreecamInteract(), this);
+        if(this.getConfig().getBoolean("enable-lava-immunity"))
+            pluginManager.registerEvents(new PlayerLavaDamage(this), this);
     }
 
     public static LecternClaim getInstance(){

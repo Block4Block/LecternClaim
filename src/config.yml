@@ -13,6 +13,8 @@ hints-enabled: false
 seconds-between-hints: 600
 # Minimum time between intruder alerts
 seconds-between-intruder-alerts: 60
+# Minimum time between lava immunity messages
+seconds-between-lava-immunity-msgs: 60
 # Make lavacasting form andesite instead of cobblestone/stone
 balance-lavacasting: true
 # Give players splash when breaking andesite
@@ -23,6 +25,8 @@ disable-freecam-interactions: true
 golems-guard-claims: true
 # Allow players to create master books that update the contents of their copies
 enable-master-books: true
+# Enable lava immunity for itemless players
+enable-lava-immunity: true
 
 # Messages to be shown chronologically the first time a player joins the server
 welcome-messages:
