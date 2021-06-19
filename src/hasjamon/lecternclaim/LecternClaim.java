@@ -31,9 +31,9 @@ public class LecternClaim extends JavaPlugin{
         registerEvents(); // Registers all the listeners
         setCommandExecutors(); // Registers all the commands
         setupHints(); // Prepares hints and starts broadcasting them
-        if(this.getConfig().getBoolean("golems-guard-claims", true))
+        if(this.getConfig().getBoolean("golems-guard-claims"))
             getServer().getScheduler().scheduleSyncRepeatingTask(this, utils::updateGolemHostility, 0, 20);
-        utils.minSecBetweenAlerts = this.getConfig().getInt("seconds-between-intruder-alerts", 60);
+        utils.minSecBetweenAlerts = this.getConfig().getInt("seconds-between-intruder-alerts");
     }
 
     private void setupHints() {
