@@ -42,3 +42,12 @@ hints:
   - "&6Hint #2: &eWrite a book with \"claim\" and your name in it, then place it on a lectern!"
   - "&6Hint #3: &eType /hints off to stop hints from appearing."
   - "&6Hint #4: &eMaster Books: Signed books can now be edited and will update all copies."
+
+# Entities that cannot blow up blocks in claims
+# Add from here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+claim-explosion-immunity:
+  - PRIMED_TNT
+  - MINECART_TNT
+  - FIREBALL
+  - WITHER_SKULL
+  - ENDER_CRYSTAL
