@@ -19,6 +19,8 @@ seconds-between-lava-immunity-msgs: 60
 balance-lavacasting: true
 # Give players splash when breaking andesite
 andesite-splash-on: true
+# Whether or not andesite destroyed by splash should reduce the durability of the tool used to break it
+andesite-splash-reduce-durability: false
 # Prevent cheat clients from interacting with chests, lecterns, etc. through blocks
 disable-freecam-interactions: true
 # Make iron golems attack intruders in claimed chunks
