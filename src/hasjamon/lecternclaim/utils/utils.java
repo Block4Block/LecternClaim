@@ -271,17 +271,22 @@ public class utils {
         updateClaimCount();
     }
 
-    public static void unclaimChunkBulk(Set<Block> blocks, String masterBookID) {
+    public static void unclaimChunkBulk(Set<Block> blocks, String masterBookID, BookMeta meta) {
         FileConfiguration claimData = plugin.cfg.getClaimData();
 
         for(Block b : blocks) {
             Location bLoc = b.getLocation();
             String chunkID = getChunkID(bLoc);
-            String[] members = getMembers(chunkID);
+            String[] membersBefore = getMembers(chunkID);
+            List<String> membersAfter = findMembersInBook(meta);
+            String[] membersRemoved = null;
+
+            if(membersBefore != null)
+                membersRemoved = Arrays.stream(membersBefore).filter(mb -> !membersAfter.contains(mb)).toArray(String[]::new);
 
             claimData.set(chunkID, null);
 
-            onChunkUnclaim(chunkID, members, bLoc, masterBookID);
+            onChunkUnclaim(chunkID, membersRemoved, bLoc, masterBookID);
         }
         plugin.cfg.saveClaimData();
 
