@@ -1,5 +1,6 @@
 package hasjamon.lecternclaim.listener;
 
+import com.mojang.authlib.properties.Property;
 import hasjamon.lecternclaim.LecternClaim;
 import hasjamon.lecternclaim.utils.utils;
 import org.bukkit.ChatColor;
@@ -10,6 +11,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -66,5 +69,20 @@ public class PlayerJoin implements Listener {
 
         offlineClaimNotifications.set(pName, null);
         plugin.cfg.saveOfflineClaimNotifications();
+
+        Collection<Property> textures = utils.getTextures(p);
+
+        if(textures != null){
+            Property prop = textures.iterator().next();
+            List<String> copy = new ArrayList<>();
+
+            copy.add(prop.getName());
+            copy.add(prop.getValue());
+            if(prop.hasSignature())
+                copy.add(prop.getSignature());
+
+            plugin.cfg.getPlayerTextures().set(p.getUniqueId().toString(), copy);
+            plugin.cfg.savePlayerTextures();
+        }
     }
 }

@@ -95,6 +95,8 @@ public class LecternClaim extends JavaPlugin{
         if(this.getConfig().getBoolean("enable-lava-immunity"))
             pluginManager.registerEvents(new PlayerLavaDamage(this), this);
         pluginManager.registerEvents(new EntityExplode(this), this);
+        if(this.getConfig().getBoolean("enable-disguises"))
+            pluginManager.registerEvents(new EquipPlayerHead(this), this);
     }
 
     public static LecternClaim getInstance(){

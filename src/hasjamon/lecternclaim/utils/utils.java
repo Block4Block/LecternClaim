@@ -1,15 +1,22 @@
 package hasjamon.lecternclaim.utils;
 
+import com.comphenix.protocol.utility.MinecraftReflection;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import hasjamon.lecternclaim.LecternClaim;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.libs.org.eclipse.sisu.Nullable;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.scheduler.BukkitTask;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -19,8 +26,11 @@ public class utils {
     public static final Map<IronGolem, String> ironGolems = new HashMap<>();
     public static final Map<Player, Set<String>> playerClaimsIntruded = new HashMap<>();
     public static final Map<Player, Long> lastIntrusionMsgReceived = new HashMap<>();
+    public static final Map<Player, BukkitTask> undisguiseTasks = new HashMap<>();
+    public static final Map<Player, String> activeDisguises = new HashMap<>();
     public static int minSecBetweenAlerts;
     private static boolean masterBookChangeMsgSent = false;
+    public static boolean isPaperServer = true;
 
     public static String chat(String message) {
         return ChatColor.translateAlternateColorCodes('&', message);
@@ -69,7 +79,7 @@ public class utils {
             if(members.size() > 0) {
                 // If the lectern is next to bedrock: Cancel
                 if(isNextToBedrock(block)){
-                    sendMessage.accept(utils.chat("&cYou cannot place a claim next to bedrock"));
+                    sendMessage.accept(chat("&cYou cannot place a claim next to bedrock"));
                     return false;
                 }
 
@@ -77,7 +87,7 @@ public class utils {
                 updateClaimCount();
 
             }else{
-                sendMessage.accept(utils.chat("&cHINT: Add \"claim\" at the top of the first page, followed by a list members, to claim this chunk!"));
+                sendMessage.accept(chat("&cHINT: Add \"claim\" at the top of the first page, followed by a list members, to claim this chunk!"));
             }
         }
 
@@ -110,7 +120,7 @@ public class utils {
     private static void setChunkClaim(Block block, List<String> members, @Nullable Consumer<String> sendMessage, String masterBookID) {
         FileConfiguration claimData = plugin.cfg.getClaimData();
         Location blockLoc = block.getLocation();
-        String chunkID = utils.getChunkID(blockLoc);
+        String chunkID = getChunkID(blockLoc);
         String membersString = String.join("\n", members);
 
         claimData.set(chunkID + ".location.X", blockLoc.getX());
@@ -129,22 +139,15 @@ public class utils {
         Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
 
         // Inform the player of the claim and its members
-        sendMessage.accept(utils.chat("&eThis chunk has now been claimed!"));
-        sendMessage.accept(utils.chat("&aMembers who can access this chunk:"));
+        sendMessage.accept(chat("&eThis chunk has now been claimed!"));
+        sendMessage.accept(chat("&aMembers who can access this chunk:"));
         for (String member : members) {
             Optional<OfflinePlayer> offlinePlayer = Arrays.stream(knownPlayers).filter(kp -> kp.getName() != null && kp.getName().equalsIgnoreCase(member)).findFirst();
 
             if (offlinePlayer.isPresent()) {
                 sendMessage.accept(ChatColor.GRAY + " - " + member);
 
-                boolean isOffline = true;
-
-                for(Player player : onlinePlayers) {
-                    if (player.getName().equalsIgnoreCase(member)) {
-                        isOffline = false;
-                        break;
-                    }
-                }
+                boolean isOffline = onlinePlayers.stream().noneMatch(op -> op.getName().equalsIgnoreCase(member));
 
                 if(isOffline){
                     String name = offlinePlayer.get().getName();
@@ -255,7 +258,7 @@ public class utils {
     public static void unclaimChunk(Block block, boolean causedByPlayer, Consumer<String> sendMessage) {
         FileConfiguration claimData = plugin.cfg.getClaimData();
         Location blockLoc = block.getLocation();
-        String chunkID = utils.getChunkID(blockLoc);
+        String chunkID = getChunkID(blockLoc);
         String[] members = getMembers(chunkID);
 
         claimData.set(chunkID, null);
@@ -273,7 +276,7 @@ public class utils {
 
         for(Block b : blocks) {
             Location bLoc = b.getLocation();
-            String chunkID = utils.getChunkID(bLoc);
+            String chunkID = getChunkID(bLoc);
             String[] members = getMembers(chunkID);
 
             claimData.set(chunkID, null);
@@ -294,9 +297,9 @@ public class utils {
             Integer pClaims = membersNumClaims.get(p.getName().toLowerCase());
 
             if(pClaims == null)
-                p.setPlayerListName(p.getName() + utils.chat(" - &c0"));
+                p.setPlayerListName(p.getName() + chat(" - &c0"));
             else
-                p.setPlayerListName(p.getName() + utils.chat(" - &c" + pClaims));
+                p.setPlayerListName(p.getName() + chat(" - &c" + pClaims));
         }
     }
 
@@ -366,15 +369,11 @@ public class utils {
     }
 
     public static boolean isIntruder(Player p, String chunkID){
-        String[] members = utils.getMembers(chunkID);
+        String[] members = getMembers(chunkID);
 
-        // If the chunk isn't claimed; else if p is a member
-        if (members == null)
+        // If the chunk isn't claimed or p is a member
+        if (members == null || isMemberOfClaim(members, p))
             return false;
-        else
-            for (String member : members)
-                if (member.equalsIgnoreCase(p.getName()))
-                    return false;
 
         return true;
     }
@@ -389,8 +388,8 @@ public class utils {
                 entry.setValue(currentChunkID);
 
                 // Make it hostile to all intruders in chunk
-                if(utils.intruders.containsKey(currentChunkID))
-                    for(Player intruder : utils.intruders.get(currentChunkID))
+                if(intruders.containsKey(currentChunkID))
+                    for(Player intruder : intruders.get(currentChunkID))
                         golem.damage(0, intruder);
             }
         }
@@ -402,17 +401,122 @@ public class utils {
             String[] members = getMembers(chunkID);
 
             if(members != null) {
-                for (String m : members) {
-                    // If p is a member
-                    if (m.equalsIgnoreCase(p.getName())) {
-                        if (!playerClaimsIntruded.containsKey(p))
-                            playerClaimsIntruded.put(p, new HashSet<>());
+                if(isMemberOfClaim(members, p, false)) {
+                    if (!playerClaimsIntruded.containsKey(p))
+                        playerClaimsIntruded.put(p, new HashSet<>());
 
-                        // Add the chunk as one of p's intruded claims
-                        playerClaimsIntruded.get(p).add(chunkID);
-                        break;
-                    }
+                    // Add the chunk as one of p's intruded claims
+                    playerClaimsIntruded.get(p).add(chunkID);
                 }
+            }
+        }
+    }
+
+    public static boolean isMemberOfClaim(String[] members, Player p) {
+        return isMemberOfClaim(members, p, true);
+    }
+
+    public static boolean isMemberOfClaim(String[] members, Player p, boolean allowDisguise) {
+        for (String member : members)
+            if (member.equalsIgnoreCase(p.getName()) || (member.equalsIgnoreCase(activeDisguises.get(p)) && allowDisguise))
+                return true;
+
+        return false;
+    }
+
+    public static void disguisePlayer(Player disguiser, OfflinePlayer disguisee) {
+        Collection<Property> textures = getCachedTextures(disguisee);
+        disguisePlayer(disguiser, textures);
+    }
+
+    public static void disguisePlayer(Player disguiser, Collection<Property> textures) {
+        setTextures(disguiser, textures);
+        updateTexturesForOthers(disguiser);
+        updateTexturesForSelf(disguiser);
+    }
+
+    public static Collection<Property> getTextures(OfflinePlayer p){
+        try{
+            Method getProfile = MinecraftReflection.getCraftPlayerClass().getDeclaredMethod("getProfile");
+            GameProfile gp = (GameProfile) getProfile.invoke(p);
+
+            return gp.getProperties().get("textures");
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Collection<Property> getCachedTextures(OfflinePlayer p){
+        List<String> strs = plugin.cfg.getPlayerTextures().getStringList(p.getUniqueId().toString());
+        Collection<Property> textures = new ArrayList<>();
+
+        if(strs.size() == 3)
+            textures.add(new Property(strs.get(0), strs.get(1), strs.get(2)));
+        else
+            textures.add(new Property(strs.get(0), strs.get(1)));
+
+        return textures;
+    }
+
+    public static void setTextures(Player p, Collection<Property> textures){
+        try{
+            Method getProfile = MinecraftReflection.getCraftPlayerClass().getDeclaredMethod("getProfile");
+            GameProfile gp = (GameProfile) getProfile.invoke(p);
+
+            gp.getProperties().removeAll("textures");
+            gp.getProperties().putAll("textures", textures);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void updateTexturesForOthers(Player disguiser) {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.hidePlayer(plugin, disguiser);
+            p.showPlayer(plugin, disguiser);
+        }
+    }
+
+    public static void updateTexturesForSelf(Player disguiser) {
+        Entity vehicle = disguiser.getVehicle();
+
+        if (vehicle != null) {
+            vehicle.removePassenger(disguiser);
+
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                vehicle.addPassenger(disguiser);
+            }, 1);
+        }
+
+        try {
+            Method refreshPlayerMethod = MinecraftReflection.getCraftPlayerClass().getDeclaredMethod("refreshPlayer");
+
+            refreshPlayerMethod.setAccessible(true);
+            refreshPlayerMethod.invoke(disguiser);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            isPaperServer = false;
+        }
+    }
+
+    public static void restorePlayerSkin(Player p) {
+        disguisePlayer(p, getCachedTextures(p));
+    }
+
+    public static void onLoseDisguise(Player disguiser) {
+        if (activeDisguises.containsKey(disguiser)) {
+            activeDisguises.remove(disguiser);
+            disguiser.sendMessage("Your disguise has expired!");
+
+            if (undisguiseTasks.containsKey(disguiser)) {
+                undisguiseTasks.get(disguiser).cancel();
+                undisguiseTasks.remove(disguiser);
+            }else {
+                String chunkID = getChunkID(disguiser.getLocation());
+                if (isIntruder(disguiser, chunkID))
+                    onIntruderEnterClaim(disguiser, chunkID);
             }
         }
     }

@@ -37,17 +37,8 @@ public class BlockBreak implements Listener {
                 String[] members = utils.getMembers(b.getLocation());
 
                 if (members != null) {
-                    boolean isMember = false;
-
-                    for (String member : members) {
-                        if (member.equalsIgnoreCase(p.getName())) {
-                            isMember = true;
-                            break;
-                        }
-                    }
-
                     // If the chunk is claimed, the player isn't a member, and 'can-break-in-others-claims' isn't on
-                    if (!isMember && !cfg.getBoolean("can-break-in-others-claims")) {
+                    if (!utils.isMemberOfClaim(members, p) && !cfg.getBoolean("can-break-in-others-claims")) {
                         // Cancel BlockBreakEvent, i.e., prevent block from breaking
                         e.setCancelled(true);
                         p.sendMessage(utils.chat("&cYou cannot break blocks in this claim"));
@@ -90,9 +81,8 @@ public class BlockBreak implements Listener {
             String[] members = utils.getMembers(b.getLocation());
 
             if (members != null) {
-                for (String member : members)
-                    if (member.equalsIgnoreCase(p.getName()))
-                        return;
+                if(utils.isMemberOfClaim(members, p))
+                    return;
 
                 p.sendMessage(utils.chat("&cYou cannot fill buckets in this claim"));
                 e.setCancelled(true);
