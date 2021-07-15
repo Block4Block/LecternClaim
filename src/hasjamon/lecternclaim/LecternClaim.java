@@ -87,7 +87,7 @@ public class LecternClaim extends JavaPlugin{
         pluginManager.registerEvents(new PlayerJoin(this), this);
         pluginManager.registerEvents(new PlayerMove(), this);
         pluginManager.registerEvents(new PlayerQuit(), this);
-        pluginManager.registerEvents(new PlayerDeath(), this);
+        pluginManager.registerEvents(new PlayerDeath(this), this);
         pluginManager.registerEvents(new PlayerRespawn(), this);
         pluginManager.registerEvents(new ChunkLoad(), this);
         if(this.getConfig().getBoolean("disable-freecam-interactions"))
