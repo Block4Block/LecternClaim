@@ -2,6 +2,7 @@ package hasjamon.lecternclaim.listener;
 
 import hasjamon.lecternclaim.LecternClaim;
 import hasjamon.lecternclaim.utils.utils;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -22,6 +23,8 @@ public class BlockPlace implements Listener {
     public void onPlace(BlockPlaceEvent e) {
         Block b = e.getBlock();
         Player p = e.getPlayer();
+
+        if (p.getGameMode() == GameMode.CREATIVE) return;
 
         if(b.getType() == Material.LECTERN)
             return;

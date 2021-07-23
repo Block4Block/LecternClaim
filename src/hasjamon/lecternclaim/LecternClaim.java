@@ -1,9 +1,6 @@
 package hasjamon.lecternclaim;
 
-import hasjamon.lecternclaim.command.ClaimContestCommand;
-import hasjamon.lecternclaim.command.DieCommand;
-import hasjamon.lecternclaim.command.HintsCommand;
-import hasjamon.lecternclaim.command.WelcomeCommand;
+import hasjamon.lecternclaim.command.*;
 import hasjamon.lecternclaim.files.ConfigManager;
 import hasjamon.lecternclaim.listener.*;
 import hasjamon.lecternclaim.utils.utils;
@@ -76,11 +73,13 @@ public class LecternClaim extends JavaPlugin{
         PluginCommand hintsCmd = this.getCommand("hints");
         PluginCommand claimContestCmd = this.getCommand("claimcontest");
         PluginCommand welcomeCmd = this.getCommand("welcome");
+        PluginCommand claimLocCmd = this.getCommand("claimloc");
 
         if(dieCmd != null) dieCmd.setExecutor(new DieCommand());
         if(hintsCmd != null) hintsCmd.setExecutor(new HintsCommand(this));
         if(claimContestCmd != null) claimContestCmd.setExecutor(new ClaimContestCommand(this));
         if(welcomeCmd != null) welcomeCmd.setExecutor(new WelcomeCommand(this));
+        if(claimLocCmd != null) claimLocCmd.setExecutor(new ClaimLocCommand(this));
     }
 
     private void registerEvents() {

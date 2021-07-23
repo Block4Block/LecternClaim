@@ -2,6 +2,7 @@ package hasjamon.lecternclaim.listener;
 
 import hasjamon.lecternclaim.LecternClaim;
 import hasjamon.lecternclaim.utils.utils;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -68,6 +69,7 @@ public class BookPlaceTake implements Listener {
                     }
                 }
             }else{
+                if (p.getGameMode() == GameMode.CREATIVE) return;
                 String[] members = utils.getMembers(chunkID);
 
                 if(members != null){
