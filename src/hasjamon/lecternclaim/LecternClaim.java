@@ -74,12 +74,14 @@ public class LecternClaim extends JavaPlugin{
         PluginCommand claimContestCmd = this.getCommand("claimcontest");
         PluginCommand welcomeCmd = this.getCommand("welcome");
         PluginCommand claimLocCmd = this.getCommand("claimloc");
+        PluginCommand claimFixCmd = this.getCommand("claimfix");
 
         if(dieCmd != null) dieCmd.setExecutor(new DieCommand());
         if(hintsCmd != null) hintsCmd.setExecutor(new HintsCommand(this));
         if(claimContestCmd != null) claimContestCmd.setExecutor(new ClaimContestCommand(this));
         if(welcomeCmd != null) welcomeCmd.setExecutor(new WelcomeCommand(this));
         if(claimLocCmd != null) claimLocCmd.setExecutor(new ClaimLocCommand(this));
+        if(claimFixCmd != null) claimFixCmd.setExecutor(new ClaimFixCommand(this));
     }
 
     private void registerEvents() {
