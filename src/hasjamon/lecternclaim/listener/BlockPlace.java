@@ -34,14 +34,13 @@ public class BlockPlace implements Listener {
         if (plugin.cfg.getClaimData().contains(utils.getChunkID(e.getBlockPlaced().getLocation()))) {
             String[] members = utils.getMembers(b.getLocation());
 
-            if (!utils.isClaimBlock(b)){
-                // If the player placing the block is a member: Don't prevent block placement
-                if (members != null)
-                    if(utils.isMemberOfClaim(members, p))
-                        return;
-
-                e.setCancelled(true);
-                p.sendMessage(utils.chat("&cYou cannot place blocks in this claim"));
+            // If the block isn't the lectern claiming the chunk and the player isn't placing an easily breakable crop
+            if (!utils.isClaimBlock(b) && !isEasilyBreakableCrop(b.getType())){
+                // If the player placing the block isn't a member: Prevent block placement
+                if (members == null || !utils.isMemberOfClaim(members, p)) {
+                    e.setCancelled(true);
+                    p.sendMessage(utils.chat("&cYou cannot place blocks in this claim"));
+                }
             }
         }
     }
@@ -56,11 +55,21 @@ public class BlockPlace implements Listener {
             String[] members = utils.getMembers(b.getLocation());
 
             if (members != null) {
-                if(utils.isMemberOfClaim(members, p))
-                    return;
+                if(!utils.isMemberOfClaim(members, p)) {
+                    e.setCancelled(true);
+                    p.sendMessage(utils.chat("&cYou cannot empty buckets in this claim"));
+                }
+            }
+        }
+    }
 
-                p.sendMessage(utils.chat("&cYou cannot empty buckets in this claim"));
-                e.setCancelled(true);
+    private boolean isEasilyBreakableCrop(Material blockType) {
+        switch (blockType){
+            case WHEAT, POTATOES, CARROTS, BEETROOTS, SUGAR_CANE, COCOA, NETHER_WART -> {
+                return true;
+            }
+            default -> {
+                return false;
             }
         }
     }
