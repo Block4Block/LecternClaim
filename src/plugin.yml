@@ -1,9 +1,9 @@
 name: LecternClaim
 main: hasjamon.lecternclaim.LecternClaim
-api-version: 1.17
+api-version: 1.18
 authors: [ HasJamOn, Bahm, gtg_cya ]
 softdepend: [ProtocolLib]
-version: 1.6
+version: 2.0
 description: LecternClaim plugin
 commands:
   die:
