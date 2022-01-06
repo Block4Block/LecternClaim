@@ -119,6 +119,7 @@ public class LecternClaim extends JavaPlugin{
         if(this.getConfig().getBoolean("enable-claim-maps"))
             pluginManager.registerEvents(new LecternRightClick(this), this);
         pluginManager.registerEvents(new MapCraft(), this);
+        pluginManager.registerEvents(new EntityChangeBlock(this), this);
     }
 
     private void addMapRenderers() {

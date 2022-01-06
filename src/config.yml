@@ -82,3 +82,7 @@ claim-explosion-immunity:
     - MINECART_TNT
     - FIREBALL
     - WITHER_SKULL
+
+# Blocks endermen aren't allowed to place inside claims
+enderman-place-in-claim-blacklist:
+  - GRASS_BLOCK
