@@ -1,5 +1,6 @@
 package hasjamon.lecternclaim;
 
+import com.comphenix.protocol.utility.MinecraftReflection;
 import hasjamon.lecternclaim.command.*;
 import hasjamon.lecternclaim.files.ConfigManager;
 import hasjamon.lecternclaim.listener.*;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class LecternClaim extends JavaPlugin{
     public PluginManager pluginManager = getServer().getPluginManager();
     public ConfigManager cfg;
+    public boolean canUseReflection = true;
     private static LecternClaim instance;
     private List<?> hints;
     private int nextHint = 0;
@@ -28,6 +30,7 @@ public class LecternClaim extends JavaPlugin{
     @Override
     public void onEnable() {
         instance = this; // Creates instance of the plugin
+        checkReflectionAvailability();
         cfg = new ConfigManager(); // Initializes config
         populateKnownPlayers();
         registerEvents(); // Registers all the listeners
@@ -38,6 +41,14 @@ public class LecternClaim extends JavaPlugin{
         utils.minSecBetweenAlerts = this.getConfig().getInt("seconds-between-intruder-alerts");
         if(this.getConfig().getBoolean("enable-claim-maps"))
             addMapRenderers();
+    }
+
+    private void checkReflectionAvailability() {
+        try{
+            MinecraftReflection.getCraftPlayerClass().getDeclaredMethod("getProfile");
+        } catch (NoClassDefFoundError | NoSuchMethodException e) {
+            canUseReflection = false;
+        }
     }
 
     private void setupHints() {

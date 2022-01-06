@@ -502,15 +502,18 @@ public class utils {
     }
 
     public static Collection<Property> getTextures(OfflinePlayer p){
-        try{
-            Method getProfile = MinecraftReflection.getCraftPlayerClass().getDeclaredMethod("getProfile");
-            GameProfile gp = (GameProfile) getProfile.invoke(p);
+        if(plugin.canUseReflection) {
+            try {
+                Method getProfile = MinecraftReflection.getCraftPlayerClass().getDeclaredMethod("getProfile");
+                GameProfile gp = (GameProfile) getProfile.invoke(p);
 
-            return gp.getProperties().get("textures");
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-            return null;
+                return gp.getProperties().get("textures");
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
+
+        return null;
     }
 
     public static Collection<Property> getCachedTextures(OfflinePlayer p){
@@ -526,14 +529,16 @@ public class utils {
     }
 
     public static void setTextures(Player p, Collection<Property> textures){
-        try{
-            Method getProfile = MinecraftReflection.getCraftPlayerClass().getDeclaredMethod("getProfile");
-            GameProfile gp = (GameProfile) getProfile.invoke(p);
+        if(plugin.canUseReflection) {
+            try {
+                Method getProfile = MinecraftReflection.getCraftPlayerClass().getDeclaredMethod("getProfile");
+                GameProfile gp = (GameProfile) getProfile.invoke(p);
 
-            gp.getProperties().removeAll("textures");
-            gp.getProperties().putAll("textures", textures);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+                gp.getProperties().removeAll("textures");
+                gp.getProperties().putAll("textures", textures);
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -555,18 +560,20 @@ public class utils {
             }, 1);
         }
 
-        try {
-            Method refreshPlayerMethod = MinecraftReflection.getCraftPlayerClass().getDeclaredMethod("refreshPlayer");
+        if(plugin.canUseReflection) {
+            try {
+                Method refreshPlayerMethod = MinecraftReflection.getCraftPlayerClass().getDeclaredMethod("refreshPlayer");
 
-            refreshPlayerMethod.setAccessible(true);
-            refreshPlayerMethod.invoke(disguiser);
+                refreshPlayerMethod.setAccessible(true);
+                refreshPlayerMethod.invoke(disguiser);
 
-            // Fix visual bug that hides level/exp
-            disguiser.setExp(disguiser.getExp());
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            isPaperServer = false;
+                // Fix visual bug that hides level/exp
+                disguiser.setExp(disguiser.getExp());
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                isPaperServer = false;
+            }
         }
     }
 
