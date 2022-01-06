@@ -785,7 +785,15 @@ public class utils {
             case NORMAL -> "Overworld";
             case NETHER -> "The Nether";
             case THE_END -> "The End";
-            default -> "Unkown World";
+            default -> "Unknown World";
         };
+    }
+
+    public static void sendWelcomeMsg(Player player) {
+        List<String> welcomeMessages = plugin.getConfig().getStringList("welcome-messages");
+
+        for (String msg : welcomeMessages) {
+            player.sendMessage(utils.chat(msg));
+        }
     }
 }

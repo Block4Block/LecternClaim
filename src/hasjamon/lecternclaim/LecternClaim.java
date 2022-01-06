@@ -90,7 +90,7 @@ public class LecternClaim extends JavaPlugin{
         if(dieCmd != null) dieCmd.setExecutor(new DieCommand());
         if(hintsCmd != null) hintsCmd.setExecutor(new HintsCommand(this));
         if(claimContestCmd != null) claimContestCmd.setExecutor(new ClaimContestCommand(this));
-        if(welcomeCmd != null) welcomeCmd.setExecutor(new WelcomeCommand(this));
+        if(welcomeCmd != null) welcomeCmd.setExecutor(new WelcomeCommand());
         if(claimLocCmd != null) claimLocCmd.setExecutor(new ClaimLocCommand(this));
         if(claimFixCmd != null) claimFixCmd.setExecutor(new ClaimFixCommand(this));
     }
