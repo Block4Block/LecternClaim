@@ -26,7 +26,7 @@ public class BookPlaceTake implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlace(BlockPlaceEvent e){
         Block b = e.getBlock();
         Player p = e.getPlayer();

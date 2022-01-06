@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -19,7 +20,7 @@ public class BlockPlace implements Listener {
     }
 
     // Prevent blocks from being placed in someone else's claim
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlace(BlockPlaceEvent e) {
         Block b = e.getBlock();
         Player p = e.getPlayer();
