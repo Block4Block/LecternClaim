@@ -9,7 +9,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Lectern;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.craftbukkit.libs.org.eclipse.sisu.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.Player;
@@ -17,8 +16,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.map.*;
 import org.bukkit.scheduler.BukkitTask;
-import oshi.util.tuples.Pair;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -632,7 +631,7 @@ public class utils {
         return new MapRenderer() {
             final OfflinePlayer owner = creator;
             long lastUpdate = 0;
-            Map<String, Pair<Integer, Integer>> claims = null;
+            Map<String, Coords2D> claims = null;
             int blocksPerPixel = 0;
 
             public void render(MapView view, MapCanvas canvas, Player p) {
@@ -647,7 +646,7 @@ public class utils {
 
                     if (world != null) {
                         World.Environment env = world.getEnvironment();
-                        Map<String, Pair<Integer, Integer>> claimsNow = findClaimsOnCanvas(env, centerX, centerZ, blocksPerPixel);
+                        Map<String, Coords2D> claimsNow = findClaimsOnCanvas(env, centerX, centerZ, blocksPerPixel);
                         addClaimsToCanvas(canvas, claims, claimsNow, owner, blocksPerPixel);
                         claims = claimsNow;
                         lastUpdate = System.nanoTime();
@@ -665,8 +664,8 @@ public class utils {
         };
     }
 
-    private static Map<String, Pair<Integer, Integer>> findClaimsOnCanvas(World.Environment env, int centerX, int centerZ, int blocksPerPixel) {
-        Map<String, Pair<Integer, Integer>> claims = new HashMap<>();
+    private static Map<String, Coords2D> findClaimsOnCanvas(World.Environment env, int centerX, int centerZ, int blocksPerPixel) {
+        Map<String, Coords2D> claims = new HashMap<>();
         int x = centerX - 64 * blocksPerPixel;
 
         for(int i = 0; i < 128; i += 16 / blocksPerPixel) {
@@ -677,7 +676,7 @@ public class utils {
                 FileConfiguration claimData = plugin.cfg.getClaimData();
 
                 if(claimData.contains(chunkID))
-                    claims.put(chunkID, new Pair<>(i, j));
+                    claims.put(chunkID, new Coords2D(i, j));
 
                 z += 16;
             }
@@ -688,14 +687,14 @@ public class utils {
         return claims;
     }
 
-    private static void addClaimsToCanvas(MapCanvas canvas, Map<String, Pair<Integer, Integer>> claimsBefore, Map<String, Pair<Integer, Integer>> claimsNow, OfflinePlayer p, int blocksPerPixel){
+    private static void addClaimsToCanvas(MapCanvas canvas, Map<String, Coords2D> claimsBefore, Map<String, Coords2D> claimsNow, OfflinePlayer p, int blocksPerPixel){
         if(claimsBefore != null) {
             claimsBefore.values().removeAll(claimsNow.values());
 
             for (String chunkID : claimsBefore.keySet()) {
-                Pair<Integer, Integer> ij = claimsBefore.get(chunkID);
-                int i = ij.getA();
-                int j = ij.getB();
+                Coords2D ij = claimsBefore.get(chunkID);
+                int i = ij.x;
+                int j = ij.z;
 
                 for (int k = 0; k < 16 / blocksPerPixel; k++)
                     for (int l = 0; l < 16 / blocksPerPixel; l++)
@@ -704,9 +703,9 @@ public class utils {
         }
 
         for(String chunkID : claimsNow.keySet()) {
-            Pair<Integer, Integer> ij = claimsNow.get(chunkID);
-            int i = ij.getA();
-            int j = ij.getB();
+            Coords2D ij = claimsNow.get(chunkID);
+            int i = ij.x;
+            int j = ij.z;
 
             String[] members = getMembers(chunkID);
             boolean isMember = members != null && isMemberOfClaim(members, p);
