@@ -38,7 +38,7 @@ public class BookEdit implements Listener {
             ItemStack book = lectern.getInventory().getItem(0);
 
             if (book != null) {
-                String chunkID = utils.getChunkID(lectern.getLocation());
+                String claimID = utils.getClaimID(lectern.getLocation());
 
                 if(book.getType() == Material.WRITTEN_BOOK) {
                     BookMeta meta = (BookMeta) book.getItemMeta();
@@ -54,10 +54,10 @@ public class BookEdit implements Listener {
                                 Location bLoc = lectern.getLocation();
                                 boolean isCorrupted = true;
 
-                                if (claimData.contains(chunkID + ".location"))
-                                    if (claimData.get(chunkID + ".location.X").equals(bLoc.getX()))
-                                        if (claimData.get(chunkID + ".location.Y").equals(bLoc.getY()))
-                                            if (claimData.get(chunkID + ".location.Z").equals(bLoc.getZ()))
+                                if (claimData.contains(claimID + ".location"))
+                                    if (claimData.get(claimID + ".location.X").equals(bLoc.getX()))
+                                        if (claimData.get(claimID + ".location.Y").equals(bLoc.getY()))
+                                            if (claimData.get(claimID + ".location.Z").equals(bLoc.getZ()))
                                                 isCorrupted = false;
 
                                 if (isCorrupted) {
@@ -65,7 +65,7 @@ public class BookEdit implements Listener {
 
                                     List<String> copies = masterBooks.getStringList(bookID + ".copies-on-lecterns");
                                     String xyz = bLoc.getBlockX() + "," + bLoc.getBlockY() + "," + bLoc.getBlockZ();
-                                    copies.remove(chunkID + "!" + xyz);
+                                    copies.remove(claimID + "!" + xyz);
                                     masterBooks.set(bookID + ".copies-on-lecterns", copies);
                                     plugin.cfg.saveMasterBooks();
 
@@ -86,7 +86,7 @@ public class BookEdit implements Listener {
 
                     if(meta != null && plugin.getConfig().getBoolean("enable-claim-takeovers")) {
                         FileConfiguration claimTakeovers = plugin.cfg.getClaimTakeovers();
-                        List<String> replacements = claimTakeovers.getStringList(chunkID);
+                        List<String> replacements = claimTakeovers.getStringList(claimID);
                         List<String> pages = new ArrayList<>(meta.getPages());
 
                         for (String replacement : replacements) {
@@ -96,7 +96,7 @@ public class BookEdit implements Listener {
 
                         meta.setPages(pages);
                         book.setItemMeta(meta);
-                        claimTakeovers.set(chunkID, null);
+                        claimTakeovers.set(claimID, null);
                         plugin.cfg.saveClaimTakeovers();
                     }
                 }
@@ -177,13 +177,13 @@ public class BookEdit implements Listener {
 
                 for (String copy : masterBooks.getStringList(bookID + ".copies-on-lecterns")) {
                     String[] parts = copy.split("!");
-                    String chunkID = parts[0];
+                    String claimID = parts[0];
                     String[] xyz = parts[1].split(",");
-                    String environment = chunkID.split("\\|")[0];
+                    String environment = claimID.split("\\|")[0];
                     World.Environment env = World.Environment.valueOf(environment);
 
                     // If the book is turned into a claim book, but the chunk is already claimed
-                    if(!wasClaimBook && (claimData.contains(chunkID) || chunksToBeClaimed.contains(chunkID))){
+                    if(!wasClaimBook && (claimData.contains(claimID) || chunksToBeClaimed.contains(claimID))){
                         p.sendMessage(ChatColor.GRAY + "A copy of the master book at (" + String.join(", ", xyz) + ") in " + utils.getWorldName(env)  + " was in a claimed chunk and has been corrupted!");
                     }else{
                         int x = Integer.parseInt(xyz[0]);
@@ -197,15 +197,15 @@ public class BookEdit implements Listener {
                             Block lectern = world.get().getBlockAt(x, y, z);
 
                             // If the copy is corrupted / a fake claim book, do nothing
-                            if(claimData.contains(chunkID) || chunksToBeClaimed.contains(chunkID))
-                                if(Math.round(claimData.getDouble(chunkID + ".location.X")) != x ||
-                                        Math.round(claimData.getDouble(chunkID + ".location.Y")) != y ||
-                                        Math.round(claimData.getDouble(chunkID + ".location.Z")) != z)
+                            if(claimData.contains(claimID) || chunksToBeClaimed.contains(claimID))
+                                if(Math.round(claimData.getDouble(claimID + ".location.X")) != x ||
+                                        Math.round(claimData.getDouble(claimID + ".location.Y")) != y ||
+                                        Math.round(claimData.getDouble(claimID + ".location.Z")) != z)
                                     continue;
 
                             toBeUnclaimed.add(lectern);
                             if (isClaimBook) {
-                                chunksToBeClaimed.add(chunkID);
+                                chunksToBeClaimed.add(claimID);
                                 toBeClaimed.add(lectern);
                             }
                         }else{

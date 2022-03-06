@@ -39,9 +39,9 @@ public class BookPlaceTake implements Listener {
             boolean canPlace = true;
             Location bLoc = b.getLocation();
 
-            String chunkID = utils.getChunkID(bLoc);
+            String claimID = utils.getClaimID(bLoc);
             FileConfiguration claimData = plugin.cfg.getClaimData();
-            boolean isClaimed = claimData.contains(chunkID);
+            boolean isClaimed = claimData.contains(claimID);
 
             // If you're placing a book
             if(isBook){
@@ -64,13 +64,13 @@ public class BookPlaceTake implements Listener {
                             canPlace = false;
                             p.sendMessage(utils.chat("&cThis chunk is already claimed! Find the claim book or remove \"claim\" from your book to place it."));
                         }else {
-                            canPlace = utils.claimChunk(b, meta, p::sendMessage);
+                            canPlace = utils.claimChunk(b, utils.findMembersInBook(meta), p::sendMessage);
                         }
                     }
                 }
             }else{
                 if (p.getGameMode() == GameMode.CREATIVE) return;
-                String[] members = utils.getMembers(chunkID);
+                String[] members = utils.getMembers(claimID);
 
                 if(members != null){
                     if(!utils.isMemberOfClaim(members, p)){
@@ -97,7 +97,7 @@ public class BookPlaceTake implements Listener {
 
                             if(masterBooks.contains(bookID + ".copies-on-lecterns"))
                                 copies = masterBooks.getStringList(bookID + ".copies-on-lecterns");
-                            copies.add(chunkID + "!" + xyz);
+                            copies.add(claimID + "!" + xyz);
 
                             masterBooks.set(bookID + ".copies-on-lecterns", copies);
                             plugin.cfg.saveMasterBooks();
@@ -117,9 +117,9 @@ public class BookPlaceTake implements Listener {
     @EventHandler
     public void onBookTake(PlayerTakeLecternBookEvent e){
         Block lecternBlock = e.getLectern().getBlock();
-        String chunkID = utils.getChunkID(e.getLectern().getLocation());
+        String claimID = utils.getClaimID(e.getLectern().getLocation());
 
-        if(plugin.cfg.getClaimData().contains(chunkID))
+        if(plugin.cfg.getClaimData().contains(claimID))
             if(utils.isClaimBlock(lecternBlock))
                 utils.unclaimChunk(lecternBlock, true, e.getPlayer()::sendMessage);
     }

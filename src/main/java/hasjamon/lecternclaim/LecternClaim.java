@@ -39,6 +39,7 @@ public class LecternClaim extends JavaPlugin{
         if(this.getConfig().getBoolean("golems-guard-claims"))
             getServer().getScheduler().scheduleSyncRepeatingTask(this, utils::updateGolemHostility, 0, 20);
         utils.minSecBetweenAlerts = this.getConfig().getInt("seconds-between-intruder-alerts");
+        utils.claimWidth = this.getConfig().getInt("claim-width");
         if(this.getConfig().getBoolean("enable-claim-maps"))
             addMapRenderers();
     }
@@ -104,7 +105,7 @@ public class LecternClaim extends JavaPlugin{
         if(this.getConfig().getBoolean("balance-lavacasting"))
             pluginManager.registerEvents(new LavaCasting(), this);
         pluginManager.registerEvents(new PlayerJoin(this), this);
-        pluginManager.registerEvents(new PlayerMove(), this);
+        pluginManager.registerEvents(new PlayerMove(this), this);
         pluginManager.registerEvents(new PlayerQuit(), this);
         pluginManager.registerEvents(new PlayerDeath(this), this);
         pluginManager.registerEvents(new PlayerRespawn(), this);

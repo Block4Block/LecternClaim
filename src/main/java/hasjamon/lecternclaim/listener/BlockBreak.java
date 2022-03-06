@@ -32,7 +32,7 @@ public class BlockBreak implements Listener {
         if (p.getGameMode() == GameMode.CREATIVE) return;
 
         // If the block is in a claimed chunk
-        if (plugin.cfg.getClaimData().contains(utils.getChunkID(b.getLocation()))) {
+        if (plugin.cfg.getClaimData().contains(utils.getClaimID(b.getLocation()))) {
             if (!utils.isClaimBlock(b)) {
                 String[] members = utils.getMembers(b.getLocation());
 
@@ -71,14 +71,14 @@ public class BlockBreak implements Listener {
     public void onBucketFill(PlayerBucketFillEvent e) {
         Player p = e.getPlayer();
         Block b = e.getBlock();
-        String chunkID = utils.getChunkID(b.getLocation());
+        String claimID = utils.getClaimID(b.getLocation());
 
         // Allow milking
         if(b.getType() == Material.AIR)
             return;
 
         // Disallow filling buckets with anything other than milk
-        if (plugin.cfg.getClaimData().contains(chunkID)) {
+        if (plugin.cfg.getClaimData().contains(claimID)) {
             String[] members = utils.getMembers(b.getLocation());
 
             if (members != null) {

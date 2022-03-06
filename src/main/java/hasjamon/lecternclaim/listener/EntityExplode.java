@@ -32,7 +32,7 @@ public class EntityExplode implements Listener {
         if(claimImmunity != null && claimImmunity.contains(e.getEntityType().toString())){
             FileConfiguration claimData = plugin.cfg.getClaimData();
 
-            e.blockList().removeIf(b -> claimData.contains(utils.getChunkID(b.getLocation())));
+            e.blockList().removeIf(b -> claimData.contains(utils.getClaimID(b.getLocation())));
         }
     }
 }
